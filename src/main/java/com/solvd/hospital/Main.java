@@ -202,7 +202,7 @@ public class Main {
             .forEach(s -> LOGGER.warn("Alert! Serious symptom detected: " + s.getName() + " (" + s.getSeverity() + ")"));
 
 
-        List<String> wordsToFind = List.of("Java", "ai", "Scalability", "data", "and", "of", "easier");
+        List<String> wordsToFind = List.of("Java", "ai", "Scalability", "data", "and", "of", "easier", "in");
         String inputPath = "src/main/resources/input.txt";
         String outputPath = "src/main/resources/output.txt";
         findWordsAndWriteCounts(wordsToFind, inputPath, outputPath);
@@ -211,11 +211,21 @@ public class Main {
     public static void findWordsAndWriteCounts(List<String> wordsToFind, String inputPath, String outputPath) {
         try {
             String content = FileUtils.readFileToString(new File(inputPath), StandardCharsets.UTF_8);
+
+            String[] contentSeparated = content.split("\\W+");
+
             StringBuilder result = new StringBuilder();
+
             for (String word : wordsToFind) {
-                int count = StringUtils.countMatches(content, word);
+                int count = 0;
+                for (String actualWord : contentSeparated) {
+                    if (actualWord.equalsIgnoreCase(word)) {
+                        count++;
+                    }
+                }
                 result.append(word).append(": ").append(count).append(System.lineSeparator());
             }
+
             FileUtils.writeStringToFile(new File(outputPath), result.toString(), StandardCharsets.UTF_8, true);
             LOGGER.info("findWordsAndWriteCounts completed");
         } catch (IOException e) {
