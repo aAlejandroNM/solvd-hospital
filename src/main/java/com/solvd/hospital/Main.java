@@ -32,6 +32,9 @@ import com.solvd.hospital.staff.Doctor;
 import com.solvd.hospital.repository.Repository;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import com.solvd.hospital.functional.PatientFilter;
+import com.solvd.hospital.functional.AppointmentProcessor;
+import com.solvd.hospital.functional.MedicineAction;
 
 public class Main {
 
@@ -122,15 +125,13 @@ public class Main {
         medicineRepository.add(aspirin);
 
         LOGGER.info("Current medications:");
-        for (Medicine med : medicineRepository.findAll()) {
-            LOGGER.info(med.getName() + " (Cantidad: " + med.getQuantity() + ")");
-        }
+        medicineRepository.findAll()
+                .forEach(med -> LOGGER.info(med.getName() + " (Cantidad: " + med.getQuantity() + ")"));
 
         medicineRepository.remove(omeprazole);
         LOGGER.info("Medications after discontinuing Omeprazole:");
-        for (Medicine med : medicineRepository.findAll()) {
-            LOGGER.info(med.getName() + " (quantity: " + med.getQuantity() + ")");
-        }
+        medicineRepository.findAll()
+                .forEach(med -> LOGGER.info(med.getName() + " (quantity: " + med.getQuantity() + ")"));
 
         historyService.printHistory(jhon);
 
@@ -202,6 +203,30 @@ public class Main {
             .forEach(s -> LOGGER.warn("Alert! Serious symptom detected: " + s.getName() + " (" + s.getSeverity() + ")"));
 
 
+        PatientFilter severeSymptomFilter = p -> p.getSymptoms().stream()
+                .anyMatch(s -> s.getSeverity() == SymptomSeverity.SEVERE);
+        LOGGER.info("Patients with severe symptoms in the waiting room:");
+        waitingRoom.stream().filter(severeSymptomFilter::test)
+                .forEach(p -> LOGGER.info(p.getName()));
+
+
+        AppointmentProcessor completeAppointment = a -> {
+            a.setStatus(AppointmentStatus.COMPLETED);
+            return a;
+        };
+        try {
+            Appointment appointment = appointmentService.scheduleAppointment(jhon, doctor);
+            Appointment completed = completeAppointment.process(appointment);
+            LOGGER.info("Appointment marked as COMPLETED for: " + completed.getPatient().getName());
+        } catch (InvalidAppointmentException e) {
+            LOGGER.error("Error when scheduling a medical appointment: " + e.getMessage());
+        }
+
+        MedicineAction discountStock = m -> m.setQuantity(m.getQuantity() - 1);
+        LOGGER.info("Discounting stock of medicines used in treatment:");
+        treatment.getMedications().forEach(discountStock::apply);
+        treatment.getMedications().forEach(m -> LOGGER.info(m.getName() + " current stock: " + m.getQuantity()));
+
         List<String> wordsToFind = List.of("Java", "ai", "Scalability", "data", "and", "of", "easier", "in");
         String inputPath = "src/main/resources/input.txt";
         String outputPath = "src/main/resources/output.txt";
@@ -214,19 +239,15 @@ public class Main {
 
             String[] contentSeparated = content.split("\\W+");
 
-            StringBuilder result = new StringBuilder();
+            String result = wordsToFind.stream()
+                    .map(word -> word + ": " +
+                            java.util.Arrays.stream(contentSeparated)
+                                    .filter(actualWord -> actualWord.equalsIgnoreCase(word))
+                                    .count())
+                    .collect(java.util.stream.Collectors.joining(System.lineSeparator()));
 
-            for (String word : wordsToFind) {
-                int count = 0;
-                for (String actualWord : contentSeparated) {
-                    if (actualWord.equalsIgnoreCase(word)) {
-                        count++;
-                    }
-                }
-                result.append(word).append(": ").append(count).append(System.lineSeparator());
-            }
 
-            FileUtils.writeStringToFile(new File(outputPath), result.toString(), StandardCharsets.UTF_8, true);
+            FileUtils.writeStringToFile(new File(outputPath), result, StandardCharsets.UTF_8, true);
             LOGGER.info("findWordsAndWriteCounts completed");
         } catch (IOException e) {
             LOGGER.error("Error reading or writing file: " + e.getMessage());

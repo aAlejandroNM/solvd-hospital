@@ -15,12 +15,9 @@ public class InventoryServiceImpl implements IInventoryService {
 
     @Override
     public boolean isMedicineAvailable(List<Medicine> availableMeds, Medicine medicine) {
-        for (Medicine med : availableMeds) {
-            if (med.getName().equals(medicine.getName()) && med.getQuantity() >= medicine.getQuantity()) {
-                return true;
-            }
-        }
-        return false;
+        return availableMeds.stream()
+                .anyMatch(med -> med.getName().equals(medicine.getName()) && med.getQuantity() >= medicine.getQuantity());
+
     }
 
     @Override

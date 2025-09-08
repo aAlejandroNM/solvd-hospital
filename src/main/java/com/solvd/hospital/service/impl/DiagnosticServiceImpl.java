@@ -15,23 +15,13 @@ public class DiagnosticServiceImpl implements IDiagnosticService {
     }
     @Override
     public Disease diagnose(Patient patient) {
-        for (Disease disease : knownDiseases) {
-            int matchingSymptoms = 0;
+        return knownDiseases.stream()
+                .filter(disease -> disease.getSymptoms().stream()
+                        .allMatch(diseaseSymptom -> patient.getSymptoms().stream()
+                                .anyMatch(patientSymptom -> symptomsMatch(diseaseSymptom, patientSymptom))))
+                .findFirst()
+                .orElse(new Disease("Unknown", "No disease matches the symptoms", new ArrayList<>()));
 
-            for (Symptom diseaseSymptom : disease.getSymptoms()) {
-                for (Symptom patientSymptom : patient.getSymptoms()) {
-                    if (symptomsMatch(diseaseSymptom, patientSymptom)) {
-                        matchingSymptoms++;
-                        break;
-                    }
-                }
-            }
-
-            if (matchingSymptoms == disease.getSymptoms().size()) {
-                return disease;
-            }
-        }
-        return new Disease("Unknown", "No disease matches the symptoms", new ArrayList<>());
     }
     private boolean symptomsMatch(Symptom diseaseSymptom, Symptom patientSymptom) {
         return diseaseSymptom.getName().equals(patientSymptom.getName());

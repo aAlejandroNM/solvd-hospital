@@ -35,9 +35,8 @@ public class PatientHistory<T extends MedicalDocument> extends MedicalDocument {
 
     public void printHistory() {
         LOGGER.info("History for " + patient.getName());
-        for (T doc : medicalDocuments) {
-            LOGGER.info(doc.toString());
-        }
+        medicalDocuments
+                .forEach(doc -> LOGGER.info(doc.toString()));
     }
 
     @Override
