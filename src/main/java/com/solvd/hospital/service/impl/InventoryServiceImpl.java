@@ -1,6 +1,7 @@
 package com.solvd.hospital.service.impl;
 
 import com.solvd.hospital.Main;
+import com.solvd.hospital.annotation.Auditable;
 import com.solvd.hospital.exception.InsufficientMedicineException;
 import com.solvd.hospital.medical.Medicine;
 import com.solvd.hospital.service.IInventoryService;
@@ -21,6 +22,7 @@ public class InventoryServiceImpl implements IInventoryService {
     }
 
     @Override
+    @Auditable(action = "deliverMedications")
     public void deliverMedications(List<Medicine> stock, List<Medicine> toDeliver) throws InsufficientMedicineException {
         for (Medicine medToDeliver : toDeliver) {
             Optional<Medicine> optionalStockMed = stock.stream()

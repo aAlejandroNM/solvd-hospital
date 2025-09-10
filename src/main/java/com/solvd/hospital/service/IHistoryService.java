@@ -11,4 +11,5 @@ public interface IHistoryService {
 
     void addRecord(Patient patient, MedicalRecord medicalRecord, HospitalStaff staff) throws UnauthorizedAccessException, PatientNotFoundException, DuplicateMedicalRecordException;
     void printHistory(Patient patient) throws PatientNotFoundException;
+    void removeLastRecord(Patient patient) throws PatientNotFoundException;
 }

@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.LinkedList;
 import java.util.Stack;
 
+import com.solvd.hospital.annotation.AuditUtil;
 import com.solvd.hospital.exception.*;
 import com.solvd.hospital.model.AppointmentStatus;
 import com.solvd.hospital.model.MedicalSpecialty;
@@ -231,6 +232,9 @@ public class Main {
         String inputPath = "src/main/resources/input.txt";
         String outputPath = "src/main/resources/output.txt";
         findWordsAndWriteCounts(wordsToFind, inputPath, outputPath);
+
+        AuditUtil.logAuditableMethods(HistoryServiceImpl.class);
+        AuditUtil.logAuditableMethods(InventoryServiceImpl.class);
     }
 
     public static void findWordsAndWriteCounts(List<String> wordsToFind, String inputPath, String outputPath) {

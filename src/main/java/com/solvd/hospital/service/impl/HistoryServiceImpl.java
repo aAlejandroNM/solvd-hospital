@@ -11,6 +11,7 @@ import com.solvd.hospital.staff.HospitalStaff;
 import com.solvd.hospital.staff.Doctor;
 import com.solvd.hospital.exception.UnauthorizedAccessException;
 import com.solvd.hospital.exception.DuplicateMedicalRecordException;
+import com.solvd.hospital.annotation.Auditable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class HistoryServiceImpl implements IHistoryService {
     public static final Logger LOGGER = LogManager.getLogger(HistoryServiceImpl.class);
     private final Map<Patient, List<MedicalRecord>> store = new HashMap<>();
     @Override
+    @Auditable(action = "addRecord")
     public void addRecord(Patient patient, MedicalRecord record, HospitalStaff staff) throws UnauthorizedAccessException, PatientNotFoundException, DuplicateMedicalRecordException {
         if (patient == null) {
             throw new PatientNotFoundException("The patient is null or does not exist in the system.");
@@ -51,6 +53,8 @@ public class HistoryServiceImpl implements IHistoryService {
         }
     }
 
+    @Override
+    @Auditable(action = "removeLastRecord")
     public void removeLastRecord(Patient patient) throws PatientNotFoundException {
         if (patient == null || !store.containsKey(patient)) {
             throw new PatientNotFoundException("The patient was not found in the system.");
