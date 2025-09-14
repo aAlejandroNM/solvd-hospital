@@ -15,6 +15,7 @@ import com.solvd.hospital.exception.*;
 import com.solvd.hospital.model.AppointmentStatus;
 import com.solvd.hospital.model.MedicalSpecialty;
 import com.solvd.hospital.model.SymptomSeverity;
+import com.solvd.hospital.util.HospitalLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -235,6 +236,18 @@ public class Main {
 
         AuditUtil.logAuditableMethods(HistoryServiceImpl.class);
         AuditUtil.logAuditableMethods(InventoryServiceImpl.class);
+
+        Runnable loggerTask = () -> {
+            HospitalLogger logger = HospitalLogger.getInstance();
+            String threadName = Thread.currentThread().getName();
+            logger.log("Message from the thread: " + threadName + ". Current patient: " + jhon.getName());
+        };
+        Thread thread1 = new Thread(loggerTask, "Thread-Reception");
+        Thread thread2 = new Thread(loggerTask, "Thread-Consultation");
+        Thread thread3 = new Thread(loggerTask, "Thread-Pharmacy");
+        thread1.start();
+        thread2.start();
+        thread3.start();
     }
 
     public static void findWordsAndWriteCounts(List<String> wordsToFind, String inputPath, String outputPath) {
